@@ -45,7 +45,7 @@ function Test-SNPShare {
 
 }
 
-function Map-SNPDrive {
+function Connect-SNPDrive {
 
     param(
 
@@ -79,7 +79,7 @@ function Map-SNPDrive {
     return (Test-Path "$DriveLetter`:\")
 }
 
-function Unmap-SNPDrive {
+function Disconnect-SNPDrive {
 
     param(
         [Parameter(Mandatory)]
@@ -127,7 +127,7 @@ Export-ModuleMember -Function `
 Initialize-SNPNetwork,
 Test-SNPComputer,
 Test-SNPShare,
-Map-SNPDrive,
-Unmap-SNPDrive,
+Connect-SNPDrive,
+Disconnect-SNPDrive,
 Get-SNPMappedDrives,
 Get-SNPShareStatus
