@@ -1,68 +1,80 @@
-#=========================================================
-# SNIPER Utilities Suite
-# Configuration Module
-# Build 1001
-#=========================================================
-
 Set-StrictMode -Version Latest
 
-$script:Config = @{}
+$Script:Config = @{}
 
 function Initialize-SNPConfiguration {
 
-    param(
-        [string]$ConfigFile = (Join-Path $PSScriptRoot "..\..\Config\Config.ini")
-    )
+    $ConfigFile = Join-Path $PSScriptRoot "Config.ini"
 
     if (!(Test-Path $ConfigFile)) {
         throw "Configuration file not found: $ConfigFile"
     }
 
-    $CurrentSection = ""
+    $section = ""
 
-    foreach ($Line in Get-Content $ConfigFile) {
+    Get-Content $ConfigFile | ForEach-Object {
 
-        $Line = $Line.Trim()
+        $line = $_.Trim()
 
-        if ($Line -eq "") { continue }
+        if ($line -eq "") { return }
 
-        if ($Line.StartsWith(";")) { continue }
+        if ($line.StartsWith(";")) { return }
 
-        if ($Line.StartsWith("[")) {
+        if ($line.StartsWith("[")) {
 
-            $CurrentSection = $Line.Trim("[","]")
+            $section = $line.Trim("[","]")
 
-            if (!$script:Config.ContainsKey($CurrentSection)) {
-                $script:Config[$CurrentSection] = @{}
+            if (!$Script:Config.ContainsKey($section)) {
+                $Script:Config[$section] = @{}
             }
 
-            continue
+            return
         }
 
-        if ($Line -match "=") {
+        if ($line -match "=") {
 
-            $Parts = $Line.Split("=",2)
+            $parts = $line.Split("=",2)
 
-            $Key = $Parts[0].Trim()
+            $key   = $parts[0].Trim()
+            $value = $parts[1].Trim()
 
-            $Value = $Parts[1].Trim()
+            $Script:Config[$section][$key] = $value
 
-            $script:Config[$CurrentSection][$Key] = $Value
         }
+
     }
+
 }
 
-function Get-SNPConfig {
+function Get-SNPConfigValue {
 
     param(
         [string]$Section,
         [string]$Key
     )
 
-    return $script:Config[$Section][$Key]
+    return $Script:Config[$Section][$Key]
+
+}
+
+function Show-SNPConfiguration {
+
+    foreach($section in $Script:Config.Keys){
+
+        Write-Host ""
+        Write-Host "[$section]" -ForegroundColor Cyan
+
+        foreach($key in $Script:Config[$section].Keys){
+
+            Write-Host "$key = $($Script:Config[$section][$key])"
+
+        }
+
+    }
 
 }
 
 Export-ModuleMember `
--Function Initialize-SNPConfiguration, `
-          Get-SNPConfig
+-Function Initialize-SNPConfiguration,
+          Get-SNPConfigValue,
+          Show-SNPConfiguration
