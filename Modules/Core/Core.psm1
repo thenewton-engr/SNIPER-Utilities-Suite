@@ -1,64 +1,94 @@
+#==============================================================================
+# SNIPER Utilities Suite
+# Core Module
+# Build 1003 Rev 1
+# Author : Eng. Hafeez Ur Rehman
+#==============================================================================
+
 Set-StrictMode -Version Latest
 
-$Script:SuiteName = "SNIPER Utilities Suite"
-$Script:Version   = "1.0.0-alpha1"
+function Get-SNPProjectRoot {
+
+    Split-Path (Split-Path $PSScriptRoot)
+
+}
 
 function Get-SNPVersion {
-    return $Script:Version
+
+    $VersionFile = Join-Path (Get-SNPProjectRoot) "Metadata\Version.json"
+
+    if (!(Test-Path $VersionFile))
+    {
+        throw "Version file not found:`n$VersionFile"
+    }
+
+    return (
+        Get-Content $VersionFile -Raw |
+        ConvertFrom-Json
+    ).Version
+
+}
+
+function Import-SNPFramework {
+
+    $Root = Get-SNPProjectRoot
+
+    $Modules = @(
+
+    "$Root\Modules\Configuration\Configuration.psd1",
+
+    "$Root\Modules\Logging\Logging.psd1",
+
+    "$Root\Modules\Console\Console.psd1",
+
+    "$Root\Modules\Core\Application.psd1",
+
+    "$Root\Modules\Network\Network.psd1",
+
+    "$Root\Modules\Backup\Backup.psd1"
+
+)
+
+    foreach($Module in $Modules)
+    {
+        if(Test-Path $Module)
+        {
+            Import-Module $Module -Force -ErrorAction Stop
+        }
+    }
+
 }
 
 function Start-SNPCore {
 
     Clear-Host
 
-    Write-Host ""
-    Write-Host "==========================================" -ForegroundColor Cyan
-    Write-Host "      SNIPER Utilities Suite" -ForegroundColor Green
-    Write-Host "==========================================" -ForegroundColor Cyan
-    Write-Host ""
+    Import-SNPFramework
 
-    Write-Host ("Version : " + $Script:Version)
-    Write-Host ("Computer: " + $env:COMPUTERNAME)
-    Write-Host ("User    : " + $env:USERNAME)
-    Write-Host ("Date    : " + (Get-Date))
-    Write-Host ""
-
-    $ProjectRoot = Split-Path (Split-Path $PSScriptRoot)
-
-    $Modules = @(
-        @{
-            Name="Configuration"
-            Path="$ProjectRoot\Modules\Configuration\Configuration.psm1"
-        },
-        @{
-            Name="Logging"
-            Path="$ProjectRoot\Modules\Logging\Logging.psm1"
-        },
-        @{
-            Name="Network"
-            Path="$ProjectRoot\Modules\Network\Network.psm1"
-        }
-    )
-
-    foreach($Module in $Modules)
+    if(!(Get-Command Initialize-SNP -ErrorAction SilentlyContinue))
     {
-        Write-Host ("Loading " + $Module.Name + "...") -NoNewline
-
-        if(Test-Path $Module.Path)
-        {
-            Import-Module $Module.Path -Force
-            Write-Host " OK" -ForegroundColor Green
-        }
-        else
-        {
-            Write-Host " FAILED" -ForegroundColor Red
-        }
+        throw "Application module failed to load."
     }
 
-    Write-Host ""
-    Write-Host "Core Engine Ready." -ForegroundColor Green
+    $App = Initialize-SNP
+
+    Write-SNPHeader $App.SuiteName
+
+    Write-SNPInfo ("Version    : " + $App.Version)
+    Write-SNPInfo ("Computer   : " + $App.Computer)
+    Write-SNPInfo ("User       : " + $App.User)
+    Write-SNPInfo ("Started    : " + $App.Started)
+
+    Write-SNPBlank
+
+    Write-SNPSuccess "Framework Loaded"
+
+    return $App
+
 }
 
-Export-ModuleMember `
--Function Start-SNPCore,
-          Get-SNPVersion
+Export-ModuleMember -Function `
+    Start-SNPCore, `
+    Get-SNPVersion, `
+    Get-SNPProjectRoot, `
+    Import-SNPFramework

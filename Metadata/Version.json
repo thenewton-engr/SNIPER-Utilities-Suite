@@ -1,0 +1,14 @@
+{
+    "Product": "SNIPER Utilities Suite",
+    "Codename": "SNIPER",
+    "Major": 1,
+    "Minor": 0,
+    "Patch": 0,
+    "Stage": "alpha",
+    "Build": 3,
+    "Version": "1.0.0-alpha3",
+    "Author": "Eng. Hafeez Ur Rehman",
+    "Company": "SNIPER Utilities Suite",
+    "Copyright": "© 2026 Eng. Hafeez Ur Rehman",
+    "Website": "https://github.com/thenewton-engr/SNIPER-Utilities-Suite"
+}

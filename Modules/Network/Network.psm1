@@ -8,9 +8,12 @@
 Set-StrictMode -Version Latest
 
 function Initialize-SNPNetwork {
-    Write-Host "SNIPER Network Module Initialized." -ForegroundColor Green
-}
 
+    Write-SNPInfo "Initializing Network Module"
+
+    return $true
+
+}
 function Test-SNPComputer {
 
     param(
@@ -18,7 +21,20 @@ function Test-SNPComputer {
         [string]$ComputerName
     )
 
-    return Test-Connection -ComputerName $ComputerName -Count 1 -Quiet
+    try {
+
+    return (Test-Connection `
+        -ComputerName $ComputerName `
+        -Count 1 `
+        -Quiet `
+        -ErrorAction Stop)
+
+}
+catch {
+
+    return $false
+
+}
 }
 
 function Test-SNPShare {
@@ -76,7 +92,18 @@ function Connect-SNPDrive {
 
     Start-Sleep 1
 
-    return (Test-Path "$DriveLetter`:\")
+    $Connected = Test-Path "$DriveLetter`:\"
+
+if($Connected)
+{
+    Write-SNPSuccess "Mapped $DriveLetter`: to $Share"
+}
+else
+{
+    Write-SNPError "Unable to map $DriveLetter`: to $Share"
+}
+
+return $Connected
 }
 
 function Disconnect-SNPDrive {
@@ -92,7 +119,18 @@ function Disconnect-SNPDrive {
 
     Start-Sleep 1
 
-    return !(Test-Path "$DriveLetter`:\")
+    $Disconnected = !(Test-Path "$DriveLetter`:\")
+
+if($Disconnected)
+{
+    Write-SNPInfo "$DriveLetter`: disconnected"
+}
+else
+{
+    Write-SNPWarning "$DriveLetter`: still connected"
+}
+
+return $Disconnected
 }
 
 function Get-SNPMappedDrives {
@@ -122,7 +160,24 @@ function Get-SNPShareStatus {
     }
 
 }
+function Test-SNPInternet {
 
+    try {
+
+        return (Test-Connection `
+            -ComputerName "8.8.8.8" `
+            -Count 1 `
+            -Quiet `
+            -ErrorAction Stop)
+
+    }
+    catch {
+
+        return $false
+
+    }
+
+}
 Export-ModuleMember -Function `
 Initialize-SNPNetwork,
 Test-SNPComputer,
@@ -130,4 +185,5 @@ Test-SNPShare,
 Connect-SNPDrive,
 Disconnect-SNPDrive,
 Get-SNPMappedDrives,
-Get-SNPShareStatus
+Get-SNPShareStatus,
+Test-SNPInternet

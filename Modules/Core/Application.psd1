@@ -1,10 +1,10 @@
 @{
 
-RootModule = 'Core.psm1'
+RootModule = 'Application.psm1'
 
 ModuleVersion = '1.0.0'
 
-GUID = '8a52d8a4-4f6c-4b2e-a100-000000000001'
+GUID = '6c2e5b0d-3b3b-4a91-a001-000000000002'
 
 Author = 'Eng. Hafeez Ur Rehman'
 
@@ -12,15 +12,14 @@ CompanyName = 'SNIPER Utilities Suite'
 
 Copyright = '(c) 2026'
 
-Description = 'SNIPER Core Framework'
+Description = 'SNIPER Application Context'
 
 PowerShellVersion = '5.1'
 
 FunctionsToExport = @(
-    'Start-SNPCore',
-    'Get-SNPVersion',
-    'Get-SNPProjectRoot',
-    'Import-SNPFramework'
+    'Initialize-SNP',
+    'Get-SNPVersionObject',
+    'Get-SNPProjectRoot'
 )
 
 CmdletsToExport = @()

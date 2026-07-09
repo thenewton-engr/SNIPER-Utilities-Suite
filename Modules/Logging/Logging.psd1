@@ -2,11 +2,11 @@
 
 RootModule = 'Logging.psm1'
 
-ModuleVersion = '2.0.1000'
+ModuleVersion = '2.0.1001'
 
 GUID = '8F8B8C74-3C56-4C71-8B14-A4E87A8D1000'
 
-Author = 'Eng. Hafeez Ur Rehman'
+Author = 'Eng. Hafeez Ur Rehman +923457510048'
 
 CompanyName = 'SNIPER Utilities Suite'
 
@@ -17,9 +17,10 @@ Description = 'Logging module for SNIPER Utilities Suite'
 PowerShellVersion = '5.1'
 
 FunctionsToExport = @(
-'Initialize-SNPLogging',
-'Write-SNPLog',
-'Get-SNPLogFile'
+    'Initialize-SNPLogging',
+    'Write-SNPLog',
+    'Get-SNPLogFile',
+    'Clear-SNPLog'
 )
 
 CmdletsToExport = @()

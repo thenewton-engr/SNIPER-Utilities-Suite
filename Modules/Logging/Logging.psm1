@@ -1,80 +1,113 @@
 #==============================================================================
 # SNIPER Utilities Suite
-# Module : Logging
-# Version: 2.0 Build 1000
-# Author : Eng. Hafeez Ur Rehman
+# Logging Module
+# Version : 1.0.0-alpha4
+# Author  : Eng. Hafeez Ur Rehman
 #==============================================================================
 
 Set-StrictMode -Version Latest
 
-$script:LogFile = $null
+#------------------------------------------------------------------------------
+# Module Variables
+#------------------------------------------------------------------------------
+
+$script:LogDirectory = $null
+$script:LogFile      = $null
+
+#------------------------------------------------------------------------------
+# Initialize Logging
+#------------------------------------------------------------------------------
 
 function Initialize-SNPLogging {
 
-    param(
-        [string]$LogFolder = (Join-Path $PSScriptRoot "..\..\Logs")
-    )
+    $ProjectRoot = Split-Path (Split-Path $PSScriptRoot)
 
-    # Create Logs folder if missing
-    if (!(Test-Path -Path $LogFolder)) {
-        New-Item -ItemType Directory -Path $LogFolder -Force | Out-Null
+    $script:LogDirectory = Join-Path $ProjectRoot "Logs"
+
+    if (!(Test-Path $script:LogDirectory))
+    {
+        New-Item -ItemType Directory -Path $script:LogDirectory -Force | Out-Null
     }
 
-    # Daily log file
-    $script:LogFile = Join-Path $LogFolder ("SNIPER_{0}.log" -f (Get-Date -Format "yyyyMMdd"))
+    $script:LogFile = Join-Path $script:LogDirectory "SNIPER.log"
 
-    if (!(Test-Path -Path $script:LogFile)) {
+    if (!(Test-Path $script:LogFile))
+    {
         New-Item -ItemType File -Path $script:LogFile -Force | Out-Null
     }
 
-    $line = "{0} [INFO] [{1}] [Logging] Logging initialized." -f `
-            (Get-Date -Format "yyyy-MM-dd HH:mm:ss"), `
-            $env:COMPUTERNAME
-
-    Add-Content -Path $script:LogFile -Value $line
 }
+
+#------------------------------------------------------------------------------
+# Write Log Entry
+#------------------------------------------------------------------------------
 
 function Write-SNPLog {
 
     param(
+
         [Parameter(Mandatory)]
         [string]$Message,
 
         [ValidateSet("INFO","SUCCESS","WARNING","ERROR","DEBUG")]
-        [string]$Level="INFO",
+        [string]$Level = "INFO",
 
-        [string]$Module="General"
+        [string]$Module = "General"
+
     )
 
-    if ([string]::IsNullOrWhiteSpace($script:LogFile)) {
+    if ([string]::IsNullOrWhiteSpace($script:LogFile))
+    {
         Initialize-SNPLogging
     }
 
-    $line = "{0} [{1}] [{2}] [{3}] {4}" -f `
-            (Get-Date -Format "yyyy-MM-dd HH:mm:ss"), `
-            $Level, `
-            $env:COMPUTERNAME, `
-            $Module, `
-            $Message
+    $Line = "{0} [{1}] [{2}] [{3}] {4}" -f `
+        (Get-Date -Format "yyyy-MM-dd HH:mm:ss"), `
+        $Level, `
+        $env:COMPUTERNAME, `
+        $Module, `
+        $Message
 
-    Add-Content -Path $script:LogFile -Value $line
+    Add-Content -Path $script:LogFile -Value $Line
 
-    switch ($Level) {
-        "INFO"    { Write-Host $line -ForegroundColor White }
-        "SUCCESS" { Write-Host $line -ForegroundColor Green }
-        "WARNING" { Write-Host $line -ForegroundColor Yellow }
-        "ERROR"   { Write-Host $line -ForegroundColor Red }
-        "DEBUG"   { Write-Host $line -ForegroundColor Cyan }
-    }
 }
 
+#------------------------------------------------------------------------------
+# Get Current Log File
+#------------------------------------------------------------------------------
+
 function Get-SNPLogFile {
+
+    if ([string]::IsNullOrWhiteSpace($script:LogFile))
+    {
+        Initialize-SNPLogging
+    }
 
     return $script:LogFile
 
 }
 
-Export-ModuleMember `
-    -Function Initialize-SNPLogging, `
-              Write-SNPLog, `
-              Get-SNPLogFile
+#------------------------------------------------------------------------------
+# Clear Log File
+#------------------------------------------------------------------------------
+
+function Clear-SNPLog {
+
+    if ([string]::IsNullOrWhiteSpace($script:LogFile))
+    {
+        Initialize-SNPLogging
+    }
+
+    Clear-Content -Path $script:LogFile
+
+}
+
+#------------------------------------------------------------------------------
+# Export Functions
+#------------------------------------------------------------------------------
+
+Export-ModuleMember -Function `
+    Initialize-SNPLogging, `
+    Write-SNPLog, `
+    Get-SNPLogFile, `
+    Clear-SNPLog
